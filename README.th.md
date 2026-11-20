@@ -1,5 +1,5 @@
-# agent-skills
-[![skills.sh](https://skills.sh/b/kittipongkraseatho/agent-skills)](https://skills.sh/kittipongkraseatho/agent-skills)
+# agent-workflow-skills
+[![skills.sh](https://skills.sh/b/kittipongkraseatho/agent-workflow-skills)](https://skills.sh/kittipongkraseatho/agent-workflow-skills)
 
 [English](README.md) · **ไทย**
 
@@ -18,7 +18,7 @@ Skill สำหรับ AI coding agent (Claude Code และ Codex) ตอน
 **1. ติดตั้ง skill** (ต้องมี Node.js):
 
 ```bash
-npx skills add kittipongkraseatho/agent-skills --skill agentic-setup -g
+npx skills add kittipongkraseatho/agent-workflow-skills --skill agentic-setup -g
 ```
 
 `-g` คือติดตั้งระดับเครื่อง ใช้ได้กับทุก repo

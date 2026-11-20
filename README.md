@@ -1,5 +1,5 @@
-# agent-skills
-[![skills.sh](https://skills.sh/b/kittipongkraseatho/agent-skills)](https://skills.sh/kittipongkraseatho/agent-skills)
+# agent-workflow-skills
+[![skills.sh](https://skills.sh/b/kittipongkraseatho/agent-workflow-skills)](https://skills.sh/kittipongkraseatho/agent-workflow-skills)
 
 **English** · [ไทย](README.th.md)
 
@@ -18,7 +18,7 @@ You ask once, and the AI sets up your repo so every agent works the same way:
 **1. Install the skill** (needs Node.js):
 
 ```bash
-npx skills add kittipongkraseatho/agent-skills --skill agentic-setup -g
+npx skills add kittipongkraseatho/agent-workflow-skills --skill agentic-setup -g
 ```
 
 `-g` installs it for your whole machine, so it works in every repo.
