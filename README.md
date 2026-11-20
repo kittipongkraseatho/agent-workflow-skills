@@ -81,22 +81,23 @@ It passes when the last line reports every check passed.
 
 - Writes files inside the repo only: `CLAUDE.md`, `AGENTS.md`, `.claude/`, `.agents/`, `docs/agents/`, `skills-lock.json`.
 - Adds one hook to `.claude/settings.json`. It runs a small Node script on every prompt.
-- Runs `npx skills add` to install skills from other people's GitHub repos.
+- Runs `npx skills@1.9.0 add` to install skills from other people's GitHub repos, each at a fixed commit.
 
 It never asks for sudo, never edits files outside the repo, and makes no network calls of its own. The hook only reads `CLAUDE.md` and `skills-lock.json`.
 
 **Why security scanners warn**
 
-The audits on skills.sh flag two things, and both are what the skill is for:
+The Snyk audit on skills.sh rates the skill medium on three findings. All three come from what the skill is for, so they will not go away. Here is what each means and what limits it.
 
-1. **It installs third-party skills.** A skill is a set of instructions an agent will follow, so a bad one is a real risk. The AI shows you the list and waits for your yes before installing anything, it reads an unknown skill before proposing it, and `skills-lock.json` pins what was installed.
-2. **It adds a hook that runs on every prompt.** The hook prints the Skills table from `CLAUDE.md` to the agent, so anyone who can edit `CLAUDE.md` can change what agents are told. The hook strips HTML, markdown and invisible characters, cuts long text, reads at most 40 rows, and names a skill only when it is installed in the repo.
+1. **W011, third-party content.** A skill is a set of instructions an agent will follow, so a bad one is a real risk. Before proposing a skill, the AI reads its `SKILL.md` and scripts at the commit it will install, including skills from the catalog, and flags anything that fetches URLs, runs downloaded code, asks for secrets or overrides `CLAUDE.md`. You see the list and the commits, and nothing installs until you say yes.
+2. **W012, external dependency.** The skills come from GitHub repos the skill does not control. Each one is installed at the full commit that was read (`owner/repo@<sha>`), not the repo's latest state, and the installer itself is pinned to `skills@1.9.0`. `skills-lock.json` records each skill's commit and content hash, and `verify.mjs` fails if a git-sourced skill has no commit.
+3. **W013, system changes.** The skill adds a hook to `.claude/settings.json` that runs `node .claude/hooks/skill-reminder.mjs` on every prompt. The hook prints the Skills table from `CLAUDE.md` to the agent, so anyone who can edit `CLAUDE.md` can change what agents are told. The hook strips HTML, markdown and invisible characters, cuts long text, reads at most 40 rows, and names a skill only when it is installed in the repo. It touches nothing outside the repo.
 
 **What you should still do**
 
-- Read the list of skills before you approve it.
+- Read the list of skills and the AI's notes on them before you approve.
 - Review changes to the Skills table in `CLAUDE.md` like code. The hook cannot judge the meaning of plain words.
-- Review skill updates (`npx skills update`) before you commit them.
+- Review skill updates (`npx skills@1.9.0 update`) file by file before you commit them.
 
 Found a problem? Open an issue on this repo.
 

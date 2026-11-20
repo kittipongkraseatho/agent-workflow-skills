@@ -1,12 +1,21 @@
 # Skill catalog
 
-Sources vetted in daily use on a production monorepo (pinned there in `skills-lock.json`). Install with:
+Sources vetted in daily use on a production monorepo (pinned there in `skills-lock.json`). Vetted means the source was read once, not that its current commit was. Read each skill at the commit you will install:
 
 ```bash
-npx skills add <source> --skill <name> -a claude-code -a codex --copy
+git ls-remote https://github.com/<owner>/<repo> HEAD     # the commit to pin
+gh api "repos/<owner>/<repo>/git/trees/<commit>?recursive=1" --jq '.tree[].path | select(endswith("/SKILL.md"))'   # where each skill lives
+gh api "repos/<owner>/<repo>/contents/<folder>?ref=<commit>" --jq '.[].path'   # files in one skill
+gh api "repos/<owner>/<repo>/contents/<folder>/SKILL.md?ref=<commit>" -H "Accept: application/vnd.github.raw"
 ```
 
-`--copy` writes real files into `.claude/skills/` and `.agents/skills/` (not symlinks), and the CLI records each one's source and hash in `skills-lock.json`. Several `--skill` flags can share one call when they come from the same source.
+Folders differ by source (`mattpocock/skills` nests them, as in `skills/engineering/tdd`), so look the folder up instead of guessing. Then install at that commit:
+
+```bash
+npx skills@1.9.0 add <owner>/<repo>@<commit> --skill <name> -a claude-code -a codex --copy
+```
+
+`--copy` writes real files into `.claude/skills/` and `.agents/skills/` (not symlinks), and the CLI records each one's source, commit and hash in `skills-lock.json`. Several `--skill` flags can share one call when they come from the same source and commit.
 
 ## Core set (every repo)
 
@@ -54,15 +63,11 @@ Check the version a skill is written for against the version in the manifest bef
 Not in the table (Python, .NET, Flutter, …): search, then show the human what you found before installing. A bare search mostly returns unknown authors, so search the owners in this catalog first:
 
 ```bash
-npx skills find <stack> --owner <owner>    # affaan-m, addyosmani, mattpocock, onmax, vercel-labs, the framework's own org
-npx skills find <stack>                    # only if the owners above have nothing
+npx skills@1.9.0 find <stack> --owner <owner>    # affaan-m, addyosmani, mattpocock, onmax, vercel-labs, the framework's own org
+npx skills@1.9.0 find <stack>                    # only if the owners above have nothing
 ```
 
-Prefer a skill from the framework's own organisation or a well-known author over an unknown one. Read its `SKILL.md` before proposing it: a skill is instructions the agent will follow, so an unknown one is untrusted input until someone has read it. To read one without installing it:
-
-```bash
-gh api repos/<owner>/<repo>/contents/skills/<name>/SKILL.md -H "Accept: application/vnd.github.raw"
-```
+Prefer a skill from the framework's own organisation or a well-known author over an unknown one. Read it at a commit with the commands at the top of this file before proposing it: a skill is instructions the agent will follow, so an unknown one is untrusted input until someone has read it.
 
 If nothing trustworthy exists, install no stack skill and say so. The core set works without one.
 

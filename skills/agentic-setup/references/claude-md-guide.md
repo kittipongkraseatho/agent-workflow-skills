@@ -67,7 +67,7 @@ Put stack rows first, naming the folder they apply to (`apps/api` → `nestjs-be
 
 - `CLAUDE.md` wins over a skill; name any skill rule this repo overrides.
 - The hook (`.claude/hooks/skill-reminder.mjs`) reads this table on every prompt, so editing the table is enough.
-- Add a skill with `npx skills add <source> --skill <name> -a claude-code -a codex --copy`.
+- Add a skill with `npx skills@1.9.0 add <owner>/<repo>@<commit> --skill <name> -a claude-code -a codex --copy`, after reading it at that commit.
 - Delivery loop (if adopted): `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement-spec` → `/pr` → `/retro`; read `docs/agents/loop.md` before each step.
 
 ### 10. Anti-goals
