@@ -73,6 +73,33 @@ node ~/.claude/skills/agentic-setup/scripts/verify.mjs .
 
 ผ่านเมื่อบรรทัดสุดท้ายขึ้นว่า checks passed ครบทุกข้อ
 
+## ความปลอดภัย
+
+`agentic-setup` เปลี่ยนวิธีทำงานของ agent ใน repo ของคุณ จึงขอบอกให้ชัดว่ามันทำอะไรบ้าง
+
+**สิ่งที่ทำบนเครื่องของคุณ**
+
+- เขียนไฟล์เฉพาะใน repo: `CLAUDE.md`, `AGENTS.md`, `.claude/`, `.agents/`, `docs/agents/`, `skills-lock.json`
+- เพิ่ม hook หนึ่งตัวใน `.claude/settings.json` ซึ่งรัน script Node ขนาดเล็กทุกครั้งที่สั่งงาน
+- รัน `npx skills add` เพื่อติดตั้ง skill จาก repo GitHub ของคนอื่น
+
+skill นี้ไม่ขอสิทธิ์ sudo ไม่แก้ไฟล์นอก repo และไม่เรียกเครือข่ายเอง ส่วน hook อ่านแค่ `CLAUDE.md` กับ `skills-lock.json`
+
+**ทำไมเครื่องมือตรวจความปลอดภัยถึงเตือน**
+
+ผลตรวจบน skills.sh เตือนสองเรื่อง และทั้งสองเรื่องคือหน้าที่ของ skill นี้:
+
+1. **ติดตั้ง skill ของบุคคลอื่น** skill คือชุดคำสั่งที่ agent จะทำตาม skill ที่ไม่ดีจึงเป็นความเสี่ยงจริง AI จะแสดงรายการและรอให้คุณยืนยันก่อนติดตั้ง จะอ่าน skill ที่ไม่รู้จักก่อนเสนอ และ `skills-lock.json` ล็อกสิ่งที่ติดตั้งไว้
+2. **เพิ่ม hook ที่รันทุกครั้งที่สั่งงาน** hook ส่งตาราง Skills จาก `CLAUDE.md` ให้ agent ดังนั้นใครแก้ `CLAUDE.md` ได้ก็เปลี่ยนสิ่งที่ agent ได้รับได้ hook จึงตัด HTML, markdown และอักขระล่องหนออก ตัดข้อความที่ยาวเกิน อ่านไม่เกิน 40 แถว และเอ่ยชื่อ skill เฉพาะตัวที่ติดตั้งอยู่ใน repo จริง
+
+**สิ่งที่คุณยังต้องทำเอง**
+
+- อ่านรายการ skill ก่อนกดยืนยัน
+- review การแก้ตาราง Skills ใน `CLAUDE.md` เหมือน review โค้ด เพราะ hook ตัดสินความหมายของคำธรรมดาไม่ได้
+- review การอัปเดต skill (`npx skills update`) ก่อน commit
+
+เจอปัญหา เปิด issue ที่ repo นี้ได้
+
 ## License
 
 [MIT](LICENSE)

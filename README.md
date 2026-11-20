@@ -73,6 +73,33 @@ node ~/.claude/skills/agentic-setup/scripts/verify.mjs .
 
 It passes when the last line reports every check passed.
 
+## Security
+
+`agentic-setup` changes how agents behave in your repo, so here is exactly what it does.
+
+**What it does on your machine**
+
+- Writes files inside the repo only: `CLAUDE.md`, `AGENTS.md`, `.claude/`, `.agents/`, `docs/agents/`, `skills-lock.json`.
+- Adds one hook to `.claude/settings.json`. It runs a small Node script on every prompt.
+- Runs `npx skills add` to install skills from other people's GitHub repos.
+
+It never asks for sudo, never edits files outside the repo, and makes no network calls of its own. The hook only reads `CLAUDE.md` and `skills-lock.json`.
+
+**Why security scanners warn**
+
+The audits on skills.sh flag two things, and both are what the skill is for:
+
+1. **It installs third-party skills.** A skill is a set of instructions an agent will follow, so a bad one is a real risk. The AI shows you the list and waits for your yes before installing anything, it reads an unknown skill before proposing it, and `skills-lock.json` pins what was installed.
+2. **It adds a hook that runs on every prompt.** The hook prints the Skills table from `CLAUDE.md` to the agent, so anyone who can edit `CLAUDE.md` can change what agents are told. The hook strips HTML, markdown and invisible characters, cuts long text, reads at most 40 rows, and names a skill only when it is installed in the repo.
+
+**What you should still do**
+
+- Read the list of skills before you approve it.
+- Review changes to the Skills table in `CLAUDE.md` like code. The hook cannot judge the meaning of plain words.
+- Review skill updates (`npx skills update`) before you commit them.
+
+Found a problem? Open an issue on this repo.
+
 ## License
 
 [MIT](LICENSE)
