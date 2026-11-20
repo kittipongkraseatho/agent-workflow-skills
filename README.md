@@ -1,74 +1,76 @@
 # agent-skills
 
-Skill สำหรับ AI coding agent (Claude Code และ Codex) ตอนนี้มี 1 ตัว: **`agentic-setup`**
+**English** · [ไทย](README.th.md)
 
-## agentic-setup ทำอะไร
+Skills for AI coding agents (Claude Code and Codex). There is one so far: **`agentic-setup`**.
 
-สั่งครั้งเดียว AI จะตั้งค่า repo ของคุณให้ agent ทุกตัวทำงานแบบเดียวกัน:
+## What agentic-setup does
 
-1. **อ่านกฎจากไฟล์เดียว** คือ `CLAUDE.md`
-2. **โหลด skill ที่ตรงกับงานก่อนแตะโค้ด** เพราะมี hook คอยเตือนทุกครั้งที่สั่งงาน
-3. **ทำงานตามขั้นตอนเดียวกัน** ตั้งแต่รับงานจนเปิด PR โดยมีคนอนุมัติในจุดสำคัญ
+You ask once, and the AI sets up your repo so every agent works the same way:
 
-## วิธีใช้
+1. **It reads the rules from one file**, `CLAUDE.md`.
+2. **It loads the skill that fits the task before touching code**, because a hook reminds it on every prompt.
+3. **It follows the same steps** from request to pull request, with a human approving at the key points.
 
-**1. ติดตั้ง skill** (ต้องมี Node.js):
+## How to use it
+
+**1. Install the skill** (needs Node.js):
 
 ```bash
 npx skills add kittipongkraseatho/agent-skills --skill agentic-setup -g
 ```
 
-`-g` คือติดตั้งระดับเครื่อง ใช้ได้กับทุก repo
+`-g` installs it for your whole machine, so it works in every repo.
 
-**2. เปิด Claude Code ใน repo นั้น แล้วพิมพ์:**
+**2. Open Claude Code in the repo and type:**
 
 ```text
-ตั้งค่า agentic setup ให้ repo นี้
+Set up the agentic setup for this repo
 ```
 
-**3. ตอบคำถามสั้นๆ** ที่ AI อ่านจากโค้ดเองไม่ได้ เช่น กฎที่ห้ามละเมิด, PR เข้า branch ไหน แล้วกดยืนยันรายการ skill ที่จะติดตั้ง
+**3. Answer a few short questions** the AI cannot read from the code, such as your non-negotiable rules and which branch PRs target. Then confirm the list of skills to install.
 
-**4. Review แล้ว merge PR** ที่ AI เปิดให้
+**4. Review and merge the PR** the AI opens.
 
-## สิ่งที่ได้ใน repo
+## What you get in the repo
 
-| ไฟล์ | หน้าที่ |
+| File | What it is for |
 |---|---|
-| `CLAUDE.md` | กฎทั้งหมดของ repo และตารางว่างานแบบไหนใช้ skill ตัวไหน |
-| `AGENTS.md` | ชี้ให้ Codex และ agent อื่นไปอ่าน `CLAUDE.md` (ไม่มีกฎซ้ำ) |
-| `.claude/hooks/skill-reminder.mjs` | hook ที่อ่านตาราง skill จาก `CLAUDE.md` มาเตือน AI ทุกครั้งที่สั่งงาน |
-| `.claude/skills/` และ `.agents/skills/` | skill ชุดเดียวกันสำหรับ Claude Code และ Codex |
-| `skills-lock.json` | ล็อกเวอร์ชันของ skill ทุกคนในทีมได้ชุดเดียวกัน |
-| `docs/agents/` | กติกาของแต่ละขั้นในการส่งมอบงาน (เลือกติดตั้งได้) |
+| `CLAUDE.md` | All the repo's rules, plus a table of which skill fits which task |
+| `AGENTS.md` | Points Codex and other agents at `CLAUDE.md` (no duplicated rules) |
+| `.claude/hooks/skill-reminder.mjs` | A hook that reads the skill table from `CLAUDE.md` and reminds the AI on every prompt |
+| `.claude/skills/` and `.agents/skills/` | The same skills for Claude Code and Codex |
+| `skills-lock.json` | Pins each skill's version so the whole team gets the same copy |
+| `docs/agents/` | The rules for each step of the delivery loop (optional) |
 
-## หลังติดตั้ง AI ทำงานยังไง
+## How the AI works afterwards
 
 ```text
-คุณสั่งงาน
-  → hook เตือนตาราง skill
-  → AI อ่านกฎใน CLAUDE.md แล้วโหลด skill ที่ตรงกับงาน
-  → คุยให้เข้าใจตรงกัน → เขียน spec → แตกเป็น tickets   (คุณอนุมัติ)
-  → เขียนโค้ดแบบ test ก่อน
-  → รัน lint + test จนเขียว → AI review โค้ดตัวเอง
-  → เปิด PR                                              (คุณ review และ merge)
-  → /retro เอาบทเรียนกลับไปปรับกฎ
+you give a task
+  → the hook reminds the AI of the skill table
+  → the AI reads the rules in CLAUDE.md and loads the matching skill
+  → talk it through → write a spec → split into tickets   (you approve)
+  → write code test-first
+  → run lint + tests until green → the AI reviews its own code
+  → open a PR                                             (you review and merge)
+  → /retro feeds lessons back into the rules
 ```
 
-งานเล็กข้ามขั้น spec และ tickets ได้
+Small tasks can skip the spec and tickets steps.
 
-## ใช้กับ stack ไหนได้
+## Which stacks it works with
 
-ใช้ได้ทุก stack ขั้นตอนการทำงานไม่ขึ้นกับภาษา ส่วน skill เฉพาะ stack มีรายการที่คัดไว้แล้วสำหรับ NestJS, Nuxt, Vue, Redis และ Go ถ้าเป็น stack อื่น AI จะค้นหาแล้วให้คุณเลือกก่อนติดตั้ง
+Any stack. The workflow does not depend on the language. For stack-specific skills there is a vetted list covering NestJS, Nuxt, Vue, Redis and Go. For anything else, the AI searches and lets you choose before it installs.
 
-ทดสอบแล้วกับ monorepo (NestJS + Nuxt) และ service ภาษา Go
+Tested on a NestJS + Nuxt monorepo and on a Go service.
 
-## ตรวจว่าตั้งค่าครบ
+## Check that the setup is complete
 
 ```bash
 node ~/.claude/skills/agentic-setup/scripts/verify.mjs .
 ```
 
-ผ่านเมื่อบรรทัดสุดท้ายขึ้นว่า checks passed ครบทุกข้อ
+It passes when the last line reports every check passed.
 
 ## License
 
