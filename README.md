@@ -1,4 +1,5 @@
 # agent-skills
+[![skills.sh](https://skills.sh/b/kittipongkraseatho/agent-skills)](https://skills.sh/kittipongkraseatho/agent-skills)
 
 **English** · [ไทย](README.th.md)
 
