@@ -81,22 +81,23 @@ node ~/.claude/skills/agentic-setup/scripts/verify.mjs .
 
 - เขียนไฟล์เฉพาะใน repo: `CLAUDE.md`, `AGENTS.md`, `.claude/`, `.agents/`, `docs/agents/`, `skills-lock.json`
 - เพิ่ม hook หนึ่งตัวใน `.claude/settings.json` ซึ่งรัน script Node ขนาดเล็กทุกครั้งที่สั่งงาน
-- รัน `npx skills add` เพื่อติดตั้ง skill จาก repo GitHub ของคนอื่น
+- รัน `npx skills@1.9.0 add` เพื่อติดตั้ง skill จาก repo GitHub ของคนอื่น โดยล็อกแต่ละตัวไว้ที่ commit ที่แน่นอน
 
 skill นี้ไม่ขอสิทธิ์ sudo ไม่แก้ไฟล์นอก repo และไม่เรียกเครือข่ายเอง ส่วน hook อ่านแค่ `CLAUDE.md` กับ `skills-lock.json`
 
 **ทำไมเครื่องมือตรวจความปลอดภัยถึงเตือน**
 
-ผลตรวจบน skills.sh เตือนสองเรื่อง และทั้งสองเรื่องคือหน้าที่ของ skill นี้:
+ผลตรวจของ Snyk บน skills.sh ให้ระดับ medium จากสามข้อ ทั้งสามข้อมาจากหน้าที่ของ skill นี้เอง จึงไม่มีทางหายไป ด้านล่างคือความหมายของแต่ละข้อและสิ่งที่จำกัดความเสี่ยงไว้
 
-1. **ติดตั้ง skill ของบุคคลอื่น** skill คือชุดคำสั่งที่ agent จะทำตาม skill ที่ไม่ดีจึงเป็นความเสี่ยงจริง AI จะแสดงรายการและรอให้คุณยืนยันก่อนติดตั้ง จะอ่าน skill ที่ไม่รู้จักก่อนเสนอ และ `skills-lock.json` ล็อกสิ่งที่ติดตั้งไว้
-2. **เพิ่ม hook ที่รันทุกครั้งที่สั่งงาน** hook ส่งตาราง Skills จาก `CLAUDE.md` ให้ agent ดังนั้นใครแก้ `CLAUDE.md` ได้ก็เปลี่ยนสิ่งที่ agent ได้รับได้ hook จึงตัด HTML, markdown และอักขระล่องหนออก ตัดข้อความที่ยาวเกิน อ่านไม่เกิน 40 แถว และเอ่ยชื่อ skill เฉพาะตัวที่ติดตั้งอยู่ใน repo จริง
+1. **W011 เนื้อหาจากบุคคลอื่น** skill คือชุดคำสั่งที่ agent จะทำตาม skill ที่ไม่ดีจึงเป็นความเสี่ยงจริง ก่อนเสนอ skill ใด AI จะอ่าน `SKILL.md` และ script ของมันที่ commit ที่จะติดตั้ง รวมถึง skill ใน catalog ด้วย และแจ้งถ้าเจอคำสั่งที่ดึง URL รันโค้ดที่ดาวน์โหลดมา ขอ secret หรือสั่งให้ข้าม `CLAUDE.md` คุณจะเห็นรายการพร้อม commit และไม่มีอะไรถูกติดตั้งจนกว่าคุณจะยืนยัน
+2. **W012 dependency ภายนอก** skill มาจาก repo GitHub ที่ skill นี้ควบคุมไม่ได้ แต่ละตัวถูกติดตั้งที่ commit เต็มที่ถูกอ่านแล้ว (`owner/repo@<sha>`) ไม่ใช่สถานะล่าสุดของ repo และตัวติดตั้งเองก็ล็อกไว้ที่ `skills@1.9.0` `skills-lock.json` บันทึก commit และ hash ของแต่ละ skill และ `verify.mjs` จะ fail ถ้า skill ที่มาจาก git ไม่มี commit
+3. **W013 การแก้ระบบ** skill นี้เพิ่ม hook ใน `.claude/settings.json` ที่รัน `node .claude/hooks/skill-reminder.mjs` ทุกครั้งที่สั่งงาน hook ส่งตาราง Skills จาก `CLAUDE.md` ให้ agent ดังนั้นใครแก้ `CLAUDE.md` ได้ก็เปลี่ยนสิ่งที่ agent ได้รับได้ hook จึงตัด HTML, markdown และอักขระล่องหนออก ตัดข้อความที่ยาวเกิน อ่านไม่เกิน 40 แถว และเอ่ยชื่อ skill เฉพาะตัวที่ติดตั้งอยู่ใน repo จริง และไม่แตะอะไรนอก repo
 
 **สิ่งที่คุณยังต้องทำเอง**
 
-- อ่านรายการ skill ก่อนกดยืนยัน
+- อ่านรายการ skill และข้อสังเกตของ AI ก่อนกดยืนยัน
 - review การแก้ตาราง Skills ใน `CLAUDE.md` เหมือน review โค้ด เพราะ hook ตัดสินความหมายของคำธรรมดาไม่ได้
-- review การอัปเดต skill (`npx skills update`) ก่อน commit
+- review การอัปเดต skill (`npx skills@1.9.0 update`) ทีละไฟล์ก่อน commit
 
 เจอปัญหา เปิด issue ที่ repo นี้ได้
 

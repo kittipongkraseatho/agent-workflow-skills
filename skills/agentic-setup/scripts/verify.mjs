@@ -113,6 +113,18 @@ for (const name of named) {
   check(`skill installed: ${name}`, missing.length === 0, missing.length ? `missing from ${missing.join(", ")}` : "");
 }
 
+// 7. Git-sourced skills record the commit they came from, so the files trace to the
+// exact upstream content a human read.
+const GIT_SOURCE_TYPES = new Set(["github", "gitlab", "git"]);
+const noCommit = Object.entries(lock)
+  .filter(([, entry]) => GIT_SOURCE_TYPES.has(entry.sourceType) && !/^[0-9a-f]{40}$/i.test(entry.commit ?? ""))
+  .map(([name]) => name);
+check(
+  "skills-lock.json records a source commit for every git skill",
+  noCommit.length === 0,
+  `no commit: ${noCommit.join(", ")}\nreinstall each source with: npx skills@1.9.0 add <owner>/<repo>@<commit> --skill <name> ...`,
+);
+
 // Report.
 let failed = 0;
 for (const { name, ok, detail } of results) {
