@@ -55,7 +55,36 @@ function skillRows(markdown) {
 const rows = existsSync(join(repo, "CLAUDE.md")) ? skillRows(read("CLAUDE.md")) : null;
 check("CLAUDE.md has a '## Skills' table", Array.isArray(rows) && rows.length > 0);
 
-// 5. The hook runs and prints one pair per row.
+// 4b. The hook treats the table as untrusted input. Flag rows it would cut or drop, so a
+// reviewer sees them here instead of wondering why a reminder is missing.
+const MAX_ROWS = 40;
+const MAX_TASK_CHARS = 160;
+const SKILL_NAME = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const namesIn = (cell) => {
+  const ticked = [...cell.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+  return (ticked.length > 0 ? ticked : cell.split(/[+,/]/)).map((n) => n.trim()).filter(Boolean);
+};
+check(`Skills table has at most ${MAX_ROWS} rows`, (rows?.length ?? 0) <= MAX_ROWS, `has ${rows?.length}; the hook prints only the first ${MAX_ROWS}`);
+const problems = [];
+(rows ?? []).forEach(([task, skillCell], i) => {
+  const n = i + 1;
+  if (/<[^>]*>|[\p{Cc}\p{Cf}]/u.test(task)) problems.push(`row ${n}: task has HTML tags or invisible characters (the hook strips them)`);
+  if (task.length > MAX_TASK_CHARS + 40) problems.push(`row ${n}: task is ${task.length} characters (the hook cuts it near ${MAX_TASK_CHARS})`);
+  const bad = namesIn(skillCell).filter((name) => !SKILL_NAME.test(name));
+  if (bad.length > 0) problems.push(`row ${n}: not a skill name: ${bad.join(", ")}`);
+  if (namesIn(skillCell).length === 0) problems.push(`row ${n}: names no skill`);
+});
+check("Skills table rows are plain task text and valid skill names", problems.length === 0, problems.join("\n"));
+
+// 5. The hook runs and prints one pair per usable row.
+let lock = {};
+try {
+  lock = JSON.parse(read("skills-lock.json")).skills ?? {};
+} catch {
+  // reported by the exists check above
+}
+const isInstalled = (name) => Object.hasOwn(lock, name) || existsSync(join(repo, ".claude/skills", name, "SKILL.md"));
+const usable = (rows ?? []).slice(0, MAX_ROWS).filter(([, cell]) => namesIn(cell).some((name) => SKILL_NAME.test(name) && isInstalled(name))).length;
 if (existsSync(join(repo, ".claude/hooks/skill-reminder.mjs"))) {
   const run = spawnSync(process.execPath, [join(repo, ".claude/hooks/skill-reminder.mjs")], {
     env: { ...process.env, CLAUDE_PROJECT_DIR: repo },
@@ -63,30 +92,23 @@ if (existsSync(join(repo, ".claude/hooks/skill-reminder.mjs"))) {
   });
   const pairs = (run.stdout.match(/ -> /g) ?? []).length;
   check(
-    `hook prints ${rows?.length ?? 0} task -> skill pairs`,
-    run.status === 0 && pairs === (rows?.length ?? -1),
+    `hook prints ${usable} task -> skill pairs`,
+    run.status === 0 && pairs === usable,
     run.status === 0 ? `printed ${pairs}` : run.stderr.trim(),
   );
+  check("hook output is one line with no markup", run.status === 0 && !/[<>`]/.test(run.stdout.replaceAll(" -> ", " ")) && run.stdout.trim().split("\n").length === 1);
 }
 
 // 6. Every skill named in the table is installed for both harnesses and pinned.
-let lock = {};
-try {
-  lock = JSON.parse(read("skills-lock.json")).skills ?? {};
-} catch {
-  // reported by the exists check above
-}
 const named = new Set();
 for (const [, skillCell] of rows ?? []) {
-  const ticked = [...skillCell.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
-  const names = ticked.length > 0 ? ticked : skillCell.split(/[+,/]/);
-  for (const name of names.map((n) => n.trim()).filter(Boolean)) named.add(name);
+  for (const name of namesIn(skillCell).filter((n) => SKILL_NAME.test(n))) named.add(name);
 }
 for (const name of named) {
   const missing = [
     existsSync(join(repo, ".claude/skills", name, "SKILL.md")) ? null : ".claude/skills",
     existsSync(join(repo, ".agents/skills", name, "SKILL.md")) ? null : ".agents/skills",
-    lock[name] ? null : "skills-lock.json",
+    Object.hasOwn(lock, name) ? null : "skills-lock.json (not pinned)",
   ].filter(Boolean);
   check(`skill installed: ${name}`, missing.length === 0, missing.length ? `missing from ${missing.join(", ")}` : "");
 }

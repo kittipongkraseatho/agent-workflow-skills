@@ -61,6 +61,8 @@ Before writing, changing or reviewing code, call the matching skill with the Ski
 | review a branch or PR | `code-review` |
 ```
 
+The hook treats this table as untrusted input, because anyone who can edit `CLAUDE.md` can change what every agent is told on every prompt. So keep rows simple: plain task text of at most about 160 characters, no HTML, at most 40 rows, and skill names made of lower-case letters, digits and hyphens. The hook strips markup and invisible characters, cuts long text, and leaves out any skill that is not installed in the repo. It cannot judge the meaning of plain words, so review changes to this table like code.
+
 Put stack rows first, naming the folder they apply to (`apps/api` → `nestjs-best-practices`). Then, under the table:
 
 - `CLAUDE.md` wins over a skill; name any skill rule this repo overrides.
