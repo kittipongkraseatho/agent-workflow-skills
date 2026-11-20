@@ -30,6 +30,9 @@ Gather facts before asking anything, so the human only answers what the code can
 - Docs: README, architecture docs, ADR folder, wiki, existing rules in CONTRIBUTING.
 - Language the docs and commit messages are written in.
 - Commit messages: is there a requirement/ticket ID pattern (`REQ-123`, `ABC-45`)?
+- Git rules the repo already states for agents: when they may commit, push, open a PR, merge. These override the templates.
+- Tests: do they share one real database or other state (a `fileParallelism: false`, a shared `DATABASE_URL`)? Then parallel implementers cannot run them at the same time.
+- Does practice match the written rules? Compare the branch flow in the docs with where recent PRs actually merged, and how far the branches have drifted (`git rev-list --left-right --count origin/main...origin/develop`). Report a mismatch in step 2; do not pick a side yourself.
 
 For a large repo, hand this sweep to an `Explore` subagent and keep only its conclusions.
 
@@ -77,7 +80,9 @@ The files in `assets/` are English templates. Translate their prose into the doc
 npx skills add <source> --skill <name> [--skill <name> …] -a claude-code -a codex --copy -y
 ```
 
-One call per source; `-y` keeps it from prompting. The output is noisy, so judge by the exit code and the files. Never edit a vendored skill; a project-specific change to a skill's behaviour goes in `docs/agents/loop.md` or `CLAUDE.md`.
+One call per source; `-y` keeps it from prompting. The output is noisy, so judge by the exit code and the files. Some skills ship with CRLF line endings, so `git add` may warn that CRLF will become LF. That is harmless: `skills-lock.json` still matches after the change.
+
+If the repo formats or lints all files (prettier, markdownlint), add `.claude/skills` and `.agents` to its ignore file, so the pinned files are not rewritten. Never edit a vendored skill; a project-specific change to a skill's behaviour goes in `docs/agents/loop.md` or `CLAUDE.md`.
 
 The skill files are committed, so a fresh clone already has them and needs no restore step.
 

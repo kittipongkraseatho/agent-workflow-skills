@@ -13,6 +13,12 @@
 
 Tracker conventions: `docs/agents/issue-tracker.md`. Glossary and ADRs: `docs/agents/domain.md`.
 
+## Git rules for every step
+
+{{GIT_POLICY}}
+
+When a skill step conflicts with these rules, skip that step and report what is committed on which branch.
+
 ## /grill-with-docs
 
 Ask in the language the human writes in. Facts about the code come from a subagent reading the code, never from the human.
@@ -33,12 +39,12 @@ Ask in the language the human writes in. Facts about the code come from a subage
 ## /implement-spec
 
 - The integration branch is the work branch. Merge `origin/{{INTEGRATION_BRANCH}}` into it first when it is behind.
-- Open the draft PR with `gh pr create --draft --base {{INTEGRATION_BRANCH}}`.
-- Implementers run in worktrees (`Agent` with `isolation: "worktree"`), one branch per ticket. Each brief holds three pointers: the ticket, the spec, this file. Run at most three implementers at once.
+- {{DRAFT_PR_LINE}}
+- Implementers run in worktrees (`Agent` with `isolation: "worktree"`), one branch per ticket. Each brief holds three pointers: the ticket, the spec, this file. Run at most three implementers at once.{{TEST_CONCURRENCY}}
 - Each implementer loads the `CLAUDE.md` skill-table rows for the code it touches, then `tdd`. It reports done only after `{{CHECK_COMMAND}}` is green{{EXTRA_CHECK}}.
 - Commands that touch shared resources ({{HUMAN_ONLY_COMMANDS}}) need the human; record the need under the ticket's `## Comments`.
 - The merger merges into the integration branch, reruns `{{CHECK_COMMAND}}`, then closes the ticket.
-- Run `code-review` with fixed point `origin/{{INTEGRATION_BRANCH}}` and the spec as its spec source, fix what it finds, write the body with `/pr`, then `gh pr ready`. The human reviews and merges.
+- Run `code-review` with fixed point `origin/{{INTEGRATION_BRANCH}}` and the spec as its spec source, fix what it finds, write the body with `/pr`, then {{PR_READY_LINE}} The human reviews and merges.
 
 ## /pr
 

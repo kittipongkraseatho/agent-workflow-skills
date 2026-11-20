@@ -45,13 +45,16 @@ These carry the workflow. They do not depend on the stack.
 | `redis` / `ioredis` / BullMQ | `redis-core` | `redis/agent-skills` |
 | a web front end where speed matters | `performance` | `addyosmani/web-quality-skills` |
 | `go.mod` | `golang-patterns`, `golang-testing` | `affaan-m/ecc` |
+| `react` / `next` | `vercel-react-best-practices` | `vercel-labs/agent-skills` |
 
 A stack skill is general advice, so some of its rules will not fit the repo (a linter the repo does not use, a testing style it does not follow). List each such rule under the Skills table in `CLAUDE.md` as an override.
 
-Not in the table (React, Next.js, Python, .NET, Flutter, …): search, then show the human what you found before installing. A bare search mostly returns unknown authors, so search the owners in this catalog first:
+Check the version a skill is written for against the version in the manifest before proposing it. For example the skills in `prisma/skills` target Prisma 7, so a repo on Prisma 6 gets none of them.
+
+Not in the table (Python, .NET, Flutter, …): search, then show the human what you found before installing. A bare search mostly returns unknown authors, so search the owners in this catalog first:
 
 ```bash
-npx skills find <stack> --owner <owner>    # affaan-m, addyosmani, mattpocock, onmax, the framework's own org
+npx skills find <stack> --owner <owner>    # affaan-m, addyosmani, mattpocock, onmax, vercel-labs, the framework's own org
 npx skills find <stack>                    # only if the owners above have nothing
 ```
 
